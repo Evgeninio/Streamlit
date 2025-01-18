@@ -6,6 +6,7 @@ from huggingface_hub import login
 from TRELLIS.trellis.pipelines import TrellisImageTo3DPipeline
 from TRELLIS.trellis.utils import render_utils, postprocessing_utils
 import imageio
+import os
 
 # Загружаем модель при запуске приложения для FLUX
 @st.cache_resource
@@ -84,12 +85,16 @@ def main():
                     )
                     glb_file_path = "generated_3d_model.glb"
                     glb.export(glb_file_path)
-                    st.download_button("Скачать 3D модель (GLB)", glb_file_path)
+
+                    # Предоставляем кнопку для скачивания GLB
+                    with open(glb_file_path, "rb") as f:
+                        st.download_button("Скачать 3D модель (GLB)", data=f, file_name="generated_3d_model.glb", mime="application/octet-stream")
 
                     # Можно также предоставить скачивание PLY файлов
                     ply_file_path = "generated_3d_model.ply"
                     outputs['gaussian'][0].save_ply(ply_file_path)
-                    st.download_button("Скачать 3D модель (PLY)", ply_file_path)
+                    with open(ply_file_path, "rb") as f:
+                        st.download_button("Скачать 3D модель (PLY)", data=f, file_name="generated_3d_model.ply", mime="application/octet-stream")
 
 # Запуск приложения
 if __name__ == "__main__":
