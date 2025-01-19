@@ -7,8 +7,7 @@ from TRELLIS.trellis.pipelines import TrellisImageTo3DPipeline
 from TRELLIS.trellis.utils import render_utils, postprocessing_utils
 import imageio
 import os
-from accelerate import Accelerator
-accelerator = Accelerator(mixed_precision="fp16")
+
 # Загружаем модель при запуске приложения для FLUX
 @st.cache_resource
 def load_flux_pipeline():
@@ -17,7 +16,7 @@ def load_flux_pipeline():
         "black-forest-labs/FLUX.1-dev",
         torch_dtype=torch.float16  # Используем смешанную точность
     )
-    pipe.to("cpu")  # Переносим на GPU
+    pipe.to("cuda")  # Переносим на GPU
     return pipe
 
 # Загружаем модель при запуске приложения для TRELLIS
@@ -57,7 +56,6 @@ def main():
             else:
                 with st.spinner("Генерация изображения..."):
                         flux_pipe = load_flux_pipeline()
-                        flux_pipe = accelerator.prepare(flux_pipe)
                         image = flux_pipe(
                         prompt,
                         height=height,
