@@ -14,7 +14,7 @@ def load_flux_pipeline():
     login("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")
     pipe = FluxPipeline.from_pretrained(
         "black-forest-labs/FLUX.1-dev",
-        torch_dtype=torch.float16  # Используем смешанную точность
+        torch_dtype=torch.bfloat16  # Используем смешанную точность
     )
     if torch.cuda.is_available():
         pipe.to("cuda")  # Переносим на GPU, если он доступен
