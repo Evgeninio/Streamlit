@@ -7,6 +7,8 @@ from TRELLIS.trellis.pipelines import TrellisImageTo3DPipeline
 from TRELLIS.trellis.utils import render_utils, postprocessing_utils
 import imageio
 import os
+from accelerate import Accelerator
+accelerator = Accelerator()
 
 # Загружаем модель при запуске приложения для FLUX
 @st.cache_resource
@@ -55,8 +57,8 @@ def main():
                 st.warning("Пожалуйста, введите текстовый запрос.")
             else:
                 with st.spinner("Генерация изображения..."):
-                    try:
                         flux_pipe = load_flux_pipeline()
+                        flux_pipe = accelerator.prepare(flux_pipe)
                         image = flux_pipe(
                         prompt,
                         height=height,
@@ -65,9 +67,6 @@ def main():
                         num_inference_steps=num_inference_steps,
                         ).images[0]
                         st.image(image, caption="Сгенерированное изображение", use_column_width=True)
-                    except Exception as e:
-                        print(f"Error: {e}")
-                        st.error(f"Произошла ошибка: {e}")
 
     elif task == "Создание 3D модели (TRELLIS)":
         # Интерфейс для TRELLIS
