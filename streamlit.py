@@ -8,17 +8,18 @@ from TRELLIS.trellis.utils import render_utils, postprocessing_utils
 import imageio
 import os
 from accelerate import Accelerator
-
+DTYPE = torch.float16
 # Загружаем модель при запуске приложения для FLUX
 @st.cache_resource
 def load_flux_pipeline():
     login("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")
-    accelerator = Accelerator()
     pipe = FluxPipeline.from_pretrained(
         "black-forest-labs/FLUX.1-dev",
         torch_dtype=torch.bfloat16  # Используем смешанную точность
     )
-    pipe.to(accelerator.device)
+    pipe.enable_sequential_cpu_offload()
+    pipe.vae.enable_tiling()
+    pipe.to(DTYPE)
     return pipe
 
 # Загружаем модель при запуске приложения для TRELLIS
@@ -65,7 +66,7 @@ def main():
                         width=width,
                         guidance_scale=guidance_scale,
                         num_inference_steps=num_inference_steps,
-                        generator=torch.Generator("cpu").manual_seed(0)
+                        generator=torch.Generator(device='cuda').manual_seed(0)
                         ).images[0]
                         st.image(image, caption="Сгенерированное изображение", use_column_width=True)
 
