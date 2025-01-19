@@ -17,7 +17,7 @@ def load_flux_pipeline():
         "black-forest-labs/FLUX.1-dev",
         torch_dtype=torch.float16  # Используем смешанную точность
     )
-    pipe.to("cuda")  # Переносим на GPU
+    pipe.to("cpu")  # Переносим на GPU
     return pipe
 
 # Загружаем модель при запуске приложения для TRELLIS
