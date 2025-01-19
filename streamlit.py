@@ -7,25 +7,25 @@ from TRELLIS.trellis.pipelines import TrellisImageTo3DPipeline
 from TRELLIS.trellis.utils import render_utils, postprocessing_utils
 import imageio
 import os
+from accelerate import Accelerator
 
 # Загружаем модель при запуске приложения для FLUX
 @st.cache_resource
 def load_flux_pipeline():
     login("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")
+    accelerator = Accelerator()
     pipe = FluxPipeline.from_pretrained(
         "black-forest-labs/FLUX.1-dev",
         torch_dtype=torch.bfloat16  # Используем смешанную точность
     )
-    if torch.cuda.is_available():
-        pipe.to("cuda")  # Переносим на GPU, если он доступен
-    else:
-        pipe.to("cpu")  # Иначе используем CPU
+    pipe.to(accelerator.device)
     return pipe
 
 # Загружаем модель при запуске приложения для TRELLIS
 @st.cache_resource
 def load_trellis_model():
     login("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")
+    accelerator = Accelerator() 
     model_name = "JeffreyXiang/TRELLIS-image-large"
     trellis_pipe = TrellisImageTo3DPipeline.from_pretrained(
         model_name
@@ -65,6 +65,7 @@ def main():
                         width=width,
                         guidance_scale=guidance_scale,
                         num_inference_steps=num_inference_steps,
+                        generator=torch.Generator("cpu").manual_seed(0)
                         ).images[0]
                         st.image(image, caption="Сгенерированное изображение", use_column_width=True)
 
