@@ -1,26 +1,17 @@
-from diffusers import FluxPipeline
-from huggingface_hub import login
 import torch
-# Авторизация на HuggingFace
-login("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")
+from diffusers import FluxPipeline
 
-# Инициализация пайплайна на CPU
-pipe = FluxPipeline.from_pretrained(
-    "black-forest-labs/FLUX.1-dev",
-    torch_dtype=torch.float32  # Используем float32 для совместимости с CPU
-)
-pipe.to("cpu")  # Переносим весь процесс на CPU
+pipe = FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-dev", torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload() #save some VRAM by offloading the model to CPU. Remove this if you have enough GPU power
 
-# Устанавливаем параметры
 prompt = "A cat holding a sign that says hello world"
 image = pipe(
     prompt,
-    height=512,  # Снизьте разрешение для уменьшения потребления памяти
-    width=512,
+    height=1024,
+    width=1024,
     guidance_scale=3.5,
-    num_inference_steps=30  # Уменьшение шагов для ускорения работы
+    num_inference_steps=50,
+    max_sequence_length=512,
+    generator=torch.Generator("cpu").manual_seed(0)
 ).images[0]
-
-# Сохранение изображения
 image.save("flux-dev.png")
-
