@@ -55,15 +55,19 @@ def main():
                 st.warning("Пожалуйста, введите текстовый запрос.")
             else:
                 with st.spinner("Генерация изображения..."):
-                    flux_pipe = load_flux_pipeline()
-                    image = flux_pipe(
-                    prompt,
-                    height=height,
-                    width=width,
-                    guidance_scale=guidance_scale,
-                    num_inference_steps=num_inference_steps,
-                    ).images[0]
-                    st.image(image, caption="Сгенерированное изображение", use_column_width=True)
+                    try:
+                        flux_pipe = load_flux_pipeline()
+                        image = flux_pipe(
+                        prompt,
+                        height=height,
+                        width=width,
+                        guidance_scale=guidance_scale,
+                        num_inference_steps=num_inference_steps,
+                        ).images[0]
+                        st.image(image, caption="Сгенерированное изображение", use_column_width=True)
+                    except Exception as e:
+                        print(f"Error: {e}")
+                        st.error(f"Произошла ошибка: {e}")
 
     elif task == "Создание 3D модели (TRELLIS)":
         # Интерфейс для TRELLIS
