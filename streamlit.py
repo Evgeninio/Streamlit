@@ -46,13 +46,33 @@ def main():
         # Интерфейс для FLUX
         st.header("Генерация изображения")
         prompt = st.text_input("Введите текстовый запрос для генерации изображения:", key="flux_prompt")
+
+        # Параметры для генерации изображения
+        height = st.slider("Высота изображения", min_value=256, max_value=2048, value=1024, step=128)
+        width = st.slider("Ширина изображения", min_value=256, max_value=2048, value=1024, step=128)
+        guidance_scale = st.slider("Guidance scale", min_value=1.0, max_value=20.0, value=3.5, step=0.1)
+        num_inference_steps = st.slider("Число шагов инференса", min_value=1, max_value=100, value=50, step=1)
+        max_sequence_length = st.slider("Максимальная длина последовательности", min_value=128, max_value=1024, value=512, step=32)
+        seed = st.number_input("Семя для генератора (seed)", value=0)
+
         if st.button("Сгенерировать", key="flux_generate"):
             if not prompt:
                 st.warning("Пожалуйста, введите текстовый запрос.")
             else:
                 with st.spinner("Генерация изображения..."):
                     flux_pipe = load_flux_pipeline()
-                    image = flux_pipe(prompt).images[0]
+
+                    # Генерация изображения с переданными параметрами
+                    image = flux_pipe(
+                        prompt,
+                        height=height,
+                        width=width,
+                        guidance_scale=guidance_scale,
+                        num_inference_steps=num_inference_steps,
+                        max_sequence_length=max_sequence_length,
+                        generator=torch.Generator("cpu").manual_seed(seed)
+                    ).images[0]
+
                     st.image(image, caption="Сгенерированное изображение", use_column_width=True)
 
     elif task == "Создание 3D модели (TRELLIS)":
