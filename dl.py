@@ -15,7 +15,7 @@ torch.set_float32_matmul_precision('high')
 # Config
 BATCH_SIZE = 256
 NUM_WORKERS = 2
-SIZE_H = SIZE_W = 256
+SIZE_H = SIZE_W = 96
 NUM_CLASSES = 2
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
