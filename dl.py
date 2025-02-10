@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import pytorch_lightning as pl
-import torchvision.transforms as transforms
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from torch.utils.data import DataLoader
@@ -45,8 +44,6 @@ class AlbumentationsDataset(torch.utils.data.Dataset):
         image, label = self.dataset[index]
         image = np.array(image)  # Преобразуем в numpy массив для Albumentations
         image = self.transform(image=image)['image']
-        # Выводим размерность для отладки
-        print(f"Image shape: {image.shape}")
         return image, label
     
     def __len__(self):
@@ -59,26 +56,28 @@ class CNNModel(pl.LightningModule):
         self.conv_layers = nn.Sequential(
             nn.Conv2d(3, 32, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
+            nn.MaxPool2d(2, 2),  # Размер изображения уменьшается в два раза
             
             nn.Conv2d(32, 64, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            
+            nn.MaxPool2d(2, 2),  # Уменьшаем еще раз
+             
             nn.Conv2d(64, 128, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
+            nn.MaxPool2d(2, 2),  # Еще одно уменьшение
         )
-
+        
+        # Для вычисления правильного размера, проходим через сверточные слои
         with torch.no_grad():
             dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(DEVICE)
             output = self.conv_layers(dummy_input)
             conv_output_size = output.numel()  # Получаем количество элементов в тензоре после свертки
             print(f"Output shape after convolutions: {output.shape}, numel: {conv_output_size}")
-
+        
+        # Используем вычисленный размер для первого линейного слоя
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(conv_output_size, 256),
+            nn.Linear(conv_output_size, 256),  # Здесь правильно размер после свертки
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(256, NUM_CLASSES),
@@ -112,9 +111,6 @@ class CNNModel(pl.LightningModule):
         return optim.Adam(self.parameters(), lr=0.001)
 
 if __name__ == "__main__":
-    from torchvision import transforms
-    import numpy as np
-
     DATA_PATH = Path("data").resolve()
     train_dataset = ImageFolder(DATA_PATH / "train_11k")
     val_dataset = ImageFolder(DATA_PATH / "val")
@@ -136,3 +132,4 @@ if __name__ == "__main__":
     trainer = pl.Trainer(max_epochs=30, accelerator="gpu" if torch.cuda.is_available() else "cpu")
     trainer.fit(model, train_loader, val_loader)
     print("Готово! Модель обучена 🚀")
+
