@@ -15,7 +15,7 @@ torch.set_float32_matmul_precision('high')
 # Config
 BATCH_SIZE = 256
 NUM_WORKERS = 2
-SIZE_H = SIZE_W = 128
+SIZE_H = SIZE_W = 96
 NUM_CLASSES = 2
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,8 +25,7 @@ train_transforms = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.RandomBrightnessContrast(p=0.2),
     A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
-    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ToTensorV2(),
+@@ -29,101 +30,102 @@
 ])
 
 val_transforms = A.Compose([
@@ -69,15 +68,9 @@ class CNNModel(pl.LightningModule):
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
         )
-        with torch.no_grad():
-            dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(DEVICE)
-            output = self.conv_layers(dummy_input)
-            conv_output_size = output.numel()  # Получаем количество элементов в тензоре после свертки
-            print(f"Output shape after convolutions: {output.shape}, numel: {conv_output_size}")
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
             nn.Linear(128 * 12 * 12, 256),
-            nn.Linear(conv_output_size, 256),
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(256, NUM_CLASSES),
@@ -132,7 +125,7 @@ if __name__ == "__main__":
     )
 
     model = CNNModel()
-    trainer = pl.Trainer(max_epochs=30, accelerator="gpu" if torch.cuda.is_available() else "cpu")
+    trainer = pl.Trainer(max_epochs=10, accelerator="gpu" if torch.cuda.is_available() else "cpu")
     trainer.fit(model, train_loader, val_loader)
     print("Готово! Модель обучена 🚀")
 
