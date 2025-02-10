@@ -92,6 +92,7 @@ class CNNModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         x = x.to(DEVICE)  # Перемещаем входные данные на GPU, если необходимо
+        y = y.to(DEVICE)  # Перемещаем метки на GPU
         preds = self(x)
         loss = self.loss_fn(preds, y)
         acc = (preds.argmax(dim=1) == y).float().mean()
@@ -101,7 +102,8 @@ class CNNModel(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        x = x.to(DEVICE)  # Перемещаем входные данные на GPU, если необходимо
+        x = x.to(DEVICE)  # Перемещаем входные данные на GPU
+        y = y.to(DEVICE)  # Перемещаем метки на GPU
         preds = self(x)
         loss = self.loss_fn(preds, y)
         acc = (preds.argmax(dim=1) == y).float().mean()
@@ -134,4 +136,5 @@ if __name__ == "__main__":
     trainer = pl.Trainer(max_epochs=30, accelerator="gpu" if torch.cuda.is_available() else "cpu")
     trainer.fit(model, train_loader, val_loader)
     print("Готово! Модель обучена 🚀")
+
 
