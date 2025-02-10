@@ -9,8 +9,9 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from pathlib import Path
 import numpy as np
-import torch
+
 torch.set_float32_matmul_precision('high')
+
 # Config
 BATCH_SIZE = 256
 NUM_WORKERS = 2
@@ -40,8 +41,10 @@ class AlbumentationsDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, index):
         image, label = self.dataset[index]
-        image = np.array(image)
+        image = np.array(image)  # Преобразуем в numpy массив для Albumentations
         image = self.transform(image=image)['image']
+        # Выводим размерность для отладки
+        print(f"Image shape: {image.shape}")
         return image, label
     
     def __len__(self):
@@ -110,13 +113,14 @@ if __name__ == "__main__":
     train_dataset = AlbumentationsDataset(train_dataset, train_transforms)
     val_dataset = AlbumentationsDataset(val_dataset, val_transforms)
 
+    # Используем pin_memory=True и persistent_workers=True для улучшения загрузки данных
     train_loader = DataLoader(
-    train_dataset, batch_size=BATCH_SIZE, shuffle=True, 
-    num_workers=NUM_WORKERS, pin_memory=False, persistent_workers=False
-)
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True, 
+        num_workers=NUM_WORKERS, pin_memory=True, persistent_workers=True
+    )
     val_loader = DataLoader(
         val_dataset, batch_size=BATCH_SIZE, shuffle=False, 
-        num_workers=NUM_WORKERS, pin_memory=False, persistent_workers=False
+        num_workers=NUM_WORKERS, pin_memory=True, persistent_workers=True
     )
 
     model = CNNModel()
