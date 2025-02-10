@@ -69,7 +69,7 @@ class CNNModel(pl.LightningModule):
         
         # Для вычисления правильного размера, проходим через сверточные слои
         with torch.no_grad():
-            dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(DEVICE)
+            dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(DEVICE)  # Перемещаем на правильное устройство
             output = self.conv_layers(dummy_input)
             conv_output_size = output.numel()  # Получаем количество элементов в тензоре после свертки
             print(f"Output shape after convolutions: {output.shape}, numel: {conv_output_size}")
@@ -91,7 +91,7 @@ class CNNModel(pl.LightningModule):
     
     def training_step(self, batch, batch_idx):
         x, y = batch
-        x = x.to(DEVICE)  # Перемещаем входные данные на GPU, если необходимо
+        x = x.to(DEVICE)  # Перемещаем входные данные на GPU
         y = y.to(DEVICE)  # Перемещаем метки на GPU
         preds = self(x)
         loss = self.loss_fn(preds, y)
@@ -136,5 +136,6 @@ if __name__ == "__main__":
     trainer = pl.Trainer(max_epochs=30, accelerator="gpu" if torch.cuda.is_available() else "cpu")
     trainer.fit(model, train_loader, val_loader)
     print("Готово! Модель обучена 🚀")
+
 
 
