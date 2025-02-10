@@ -25,7 +25,6 @@ train_transforms = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.RandomBrightnessContrast(p=0.2),
     A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
-@@ -29,101 +30,102 @@
 ])
 
 val_transforms = A.Compose([
