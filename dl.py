@@ -15,7 +15,7 @@ torch.set_float32_matmul_precision('high')
 # Config
 BATCH_SIZE = 256
 NUM_WORKERS = 2
-SIZE_H = SIZE_W = 96
+SIZE_H = SIZE_W = 128
 NUM_CLASSES = 2
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -126,6 +126,6 @@ if __name__ == "__main__":
     )
 
     model = CNNModel()
-    trainer = pl.Trainer(max_epochs=10, accelerator="gpu" if torch.cuda.is_available() else "cpu")
+    trainer = pl.Trainer(max_epochs=30, accelerator="gpu" if torch.cuda.is_available() else "cpu")
     trainer.fit(model, train_loader, val_loader)
     print("Готово! Модель обучена 🚀")
