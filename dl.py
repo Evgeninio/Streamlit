@@ -64,13 +64,21 @@ class CNNModel(pl.LightningModule):
             nn.MaxPool2d(2, 2),
         )
         self.loss_fn = nn.CrossEntropyLoss()  # Initialize loss here
+        self.fc_layers = None
 
-    def setup(self, stage=None):
-        dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(self.device)
-        output = self.conv_layers(dummy_input)
+    def setup(self, stage=None): # The stage argument is optional
+        # Create a dummy input with the correct device
+        x = torch.randn(1, 3, SIZE_H, SIZE_W).to(self.device)
+
+        # VERY IMPORTANT: Pass the dummy input through the conv_layers on the correct device FIRST
+        with torch.no_grad():
+            output = self.conv_layers(x)
+
         conv_output_size = output.numel()
         print(f"Output shape after convolutions: {output.shape}, numel: {conv_output_size}")
 
+
+        # NOW initialize fc_layers, it must be defined in __init__ though
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
             nn.Linear(conv_output_size, 256),
