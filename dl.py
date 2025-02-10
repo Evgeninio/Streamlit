@@ -25,14 +25,15 @@ train_transforms = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.RandomBrightnessContrast(p=0.2),
     A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
+    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # Normalize
+    ToTensorV2(),  # Convert to Tensor
 ])
 
-val_transforms = A.Compose([
+val_transforms = A.Compose([ # This one is already correct
     A.Resize(height=SIZE_H, width=SIZE_W),
     A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ToTensorV2(),
 ])
-
 # Dataset Wrapper
 class AlbumentationsDataset(torch.utils.data.Dataset):
     def __init__(self, dataset, transform):
