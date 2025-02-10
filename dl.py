@@ -9,16 +9,16 @@ from torchvision.datasets import ImageFolder
 from pathlib import Path
 import numpy as np
 
-torch.set_float32_matmul_precision('high')
+# Устанавливаем устройство (GPU или CPU)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Config
+# Конфигурация
 BATCH_SIZE = 256
 NUM_WORKERS = 2
 SIZE_H = SIZE_W = 128
 NUM_CLASSES = 2
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Albumentations Augmentations
+# Augmentations
 train_transforms = A.Compose([
     A.Resize(height=SIZE_H, width=SIZE_W),
     A.HorizontalFlip(p=0.5),
@@ -56,15 +56,15 @@ class CNNModel(pl.LightningModule):
         self.conv_layers = nn.Sequential(
             nn.Conv2d(3, 32, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),  # Размер изображения уменьшается в два раза
+            nn.MaxPool2d(2, 2),
             
             nn.Conv2d(32, 64, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),  # Уменьшаем еще раз
+            nn.MaxPool2d(2, 2),
              
             nn.Conv2d(64, 128, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),  # Еще одно уменьшение
+            nn.MaxPool2d(2, 2),
         )
         
         # Для вычисления правильного размера, проходим через сверточные слои
@@ -136,6 +136,7 @@ if __name__ == "__main__":
     trainer = pl.Trainer(max_epochs=30, accelerator="gpu" if torch.cuda.is_available() else "cpu")
     trainer.fit(model, train_loader, val_loader)
     print("Готово! Модель обучена 🚀")
+
 
 
 
