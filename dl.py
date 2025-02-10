@@ -69,9 +69,16 @@ class CNNModel(pl.LightningModule):
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
         )
+
+        with torch.no_grad():
+            dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(DEVICE)
+            output = self.conv_layers(dummy_input)
+            conv_output_size = output.numel()  # Получаем количество элементов в тензоре после свертки
+            print(f"Output shape after convolutions: {output.shape}, numel: {conv_output_size}")
+
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(128 * 12 * 12, 256),
+            nn.Linear(conv_output_size, 256),
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(256, NUM_CLASSES),
