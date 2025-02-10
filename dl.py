@@ -65,7 +65,7 @@ class CNNModel(pl.LightningModule):
         )
         self.loss_fn = nn.CrossEntropyLoss()  # Initialize loss here
 
-    def setup(self, stage):
+    def setup(self, stage=None):
         dummy_input = torch.randn(1, 3, SIZE_H, SIZE_W).to(self.device)
         output = self.conv_layers(dummy_input)
         conv_output_size = output.numel()
